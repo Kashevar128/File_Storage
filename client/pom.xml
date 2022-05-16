@@ -27,7 +27,6 @@
             <groupId>org.example</groupId>
             <artifactId>network</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
     <build>
@@ -50,7 +49,7 @@
                         <!-- Usage: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>org.kashevar.myClient.GUI.App</mainClass>
+                            <mainClass>org.kashevar.myClient.GUI.ClientGUI</mainClass>
                         </configuration>
                     </execution>
                 </executions>

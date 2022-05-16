@@ -11,35 +11,69 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import org.kashevar.myNetwork.requests.Message;
-import org.kashevar.myNetwork.requests.StartRequest;
+import org.kashevar.myClient.GUI.ClientController;
+import org.kashevar.myNetwork.Request.StartClientRequest;
+import org.kashevar.myNetwork.Request.BasicRequest;
 
 public class NettyClient {
 
     public static final int MB_100 = 100 * 1_000_000;
 
-    public static void main(String[] args) throws InterruptedException {
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(eventLoopGroup);
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.remoteAddress("localhost", 45001);
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
-            @Override
-            protected void initChannel(SocketChannel socketChannel) {
-                socketChannel.pipeline().addLast(
-                        new ObjectDecoder(MB_100, ClassResolvers.cacheDisabled(null)),
-                        new ObjectEncoder(),
-                        new ClientHandler()
-                );
+    private ClientController clientController;
+
+    private Channel channel = null;
+
+    private String nameUser = "Bro";
+
+    public String getNameUser() {
+        return nameUser;
+    }
+
+    private CurrentListServer currentListServer;
+
+    public CurrentListServer getCurrentListServer() {
+        return currentListServer;
+    }
+
+    public ClientController getClientController() {
+        return clientController;
+    }
+
+    public NettyClient(ClientController clientController) throws InterruptedException {
+        this.clientController = clientController;
+        new Thread(()-> {
+            currentListServer = new CurrentListServer();
+            EventLoopGroup eventLoopGroup = null;
+            try {
+                eventLoopGroup = new NioEventLoopGroup();
+                Bootstrap bootstrap = new Bootstrap();
+                bootstrap.group(eventLoopGroup);
+                bootstrap.channel(NioSocketChannel.class);
+                bootstrap.remoteAddress("localhost", 45001);
+                bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) {
+                        socketChannel.pipeline().addLast(
+                                new ObjectDecoder(MB_100, ClassResolvers.cacheDisabled(null)),
+                                new ObjectEncoder(),
+                                new ClientHandler(NettyClient.this)
+                        );
+                    }
+                });
+                ChannelFuture channelFuture = bootstrap.connect().sync();
+                channel = channelFuture.channel();
+                StartClientRequest startRequest = new StartClientRequest(nameUser);
+                sendMessage(startRequest);
+                channelFuture.channel().closeFuture().sync();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                eventLoopGroup.shutdownGracefully();
             }
-        });
-        ChannelFuture channelFuture = bootstrap.connect().sync();
-        Channel channel = channelFuture.channel();
-
-        Message startRequest = new StartRequest("Привет сервак!");
-        channel.writeAndFlush(startRequest);
-
-        channelFuture.channel().closeFuture().sync();
+        }).start();
+    }
+    public void sendMessage(Object msg) {
+        BasicRequest request = (BasicRequest) msg;
+        channel.writeAndFlush(request);
     }
 }

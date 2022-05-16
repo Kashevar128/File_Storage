@@ -16,7 +16,7 @@ public class NettyServer {
 
     private static final int MB_100 = 100 * 1_000_000;
 
-    public static void main(String[] args) throws InterruptedException {
+    NettyServer() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
@@ -30,8 +30,8 @@ public class NettyServer {
                             inbound.addLast(
                                     new ObjectDecoder(MB_100, ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
-                                    new BasicHandler()
-                                    );
+                                    new ServerHandler()
+                            );
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(45001).sync();
@@ -42,4 +42,5 @@ public class NettyServer {
             bossGroup.shutdownGracefully();
         }
     }
+
 }
