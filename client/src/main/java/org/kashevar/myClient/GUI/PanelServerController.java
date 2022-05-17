@@ -100,13 +100,12 @@ public class PanelServerController implements Initializable, PanelController<Lis
                 }
             }
         });
-        //updateList(Paths.get(Constants.ROOT_PATH.getRootPath() + name));
     }
 
     public void btnPathBack(ActionEvent actionEvent) {
-        Path backPath = Paths.get(pathField.getText()).getParent();
-        if (backPath != null) {
-            // updateList(backPath);
+        Path backPath = Paths.get(getStringCurrentPath()).getParent();
+        if (backPath != null && !backPath.toString().endsWith("Data_Storage")) {
+                nettyClient.sendMessage(new GetFileListRequest(backPath, nettyClient.getNameUser()));
         }
     }
     @Override
@@ -124,7 +123,6 @@ public class PanelServerController implements Initializable, PanelController<Lis
     public String[] getStringListFiles() {
         String[] string = filesTable.getItems().stream().map(FileInfo::getFilename).
                 collect(Collectors.toList()).toArray(String[]::new);
-        System.out.println(Arrays.deepToString(string));
         return string;
     }
 

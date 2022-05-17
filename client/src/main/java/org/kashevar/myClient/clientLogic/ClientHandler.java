@@ -24,13 +24,11 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             System.out.println("Привет пользователь!");
             StartServerResponse startServerResponse = (StartServerResponse) response;
             List<String> startList = startServerResponse.getListStart();
-            startList.stream().forEach(System.out::println);
             nettyClient.getClientController().serverPC.updateList(startList);
         });
         RESPONSE_HANDLERS.put(GetFileListResponse.class, (channelHandlerContext, response, nettyClient) -> {
             GetFileListResponse getFileListResponse = (GetFileListResponse) response;
             List<String> currentList = getFileListResponse.getList();
-            currentList.stream().forEach(System.out::println);
             nettyClient.getClientController().serverPC.updateList(currentList);
         });
     }
