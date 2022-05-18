@@ -1,5 +1,7 @@
 package org.kashevar.myClient;
 
+import java.nio.file.Path;
+
 public class HelperClientMethods {
 
     public static String editingPath(String path, String name) {

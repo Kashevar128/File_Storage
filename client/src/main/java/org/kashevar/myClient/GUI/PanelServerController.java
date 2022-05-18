@@ -34,13 +34,6 @@ public class PanelServerController implements Initializable, PanelController<Lis
         this.nettyClient = nettyClient;
     }
 
-    public void setStringCurrentPath(String stringCurrentPath) {
-        this.stringCurrentPath = stringCurrentPath;
-    }
-
-    public String getStringCurrentPath() {
-        return stringCurrentPath;
-    }
 
     @FXML
     public TableView<FileInfo> filesTable;
@@ -93,7 +86,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
             @Override
             public void handle(MouseEvent mouseEvent) {
                 if (mouseEvent.getClickCount() == 2) {
-                    Path path = Paths.get(getStringCurrentPath()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
+                    Path path = Paths.get(getCurrentPath()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
                     if (Files.isDirectory(path)) {
                         nettyClient.sendMessage(new GetFileListRequest(path, nettyClient.getNameUser()));
                     }
@@ -103,7 +96,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
     }
 
     public void btnPathBack(ActionEvent actionEvent) {
-        Path backPath = Paths.get(getStringCurrentPath()).getParent();
+        Path backPath = Paths.get(getCurrentPath()).getParent();
         if (backPath != null && !backPath.toString().endsWith("Data_Storage")) {
                 nettyClient.sendMessage(new GetFileListRequest(backPath, nettyClient.getNameUser()));
         }
@@ -115,9 +108,14 @@ public class PanelServerController implements Initializable, PanelController<Lis
         }
         return filesTable.getSelectionModel().getSelectedItem();
     }
+
     @Override
     public String getCurrentPath() {
-        return pathField.getText();
+        return stringCurrentPath;
+    }
+
+    public void setCurrentPath(String stringCurrentPath) {
+        this.stringCurrentPath = stringCurrentPath;
     }
     @Override
     public String[] getStringListFiles() {
@@ -142,7 +140,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
         Path currentPath = listPath.get(list.size() - 1);
         listPath.remove(list.size() - 1);
         pathField.setText(HelperClientMethods.editingPath(currentPath.normalize().toString(), nettyClient.getNameUser()));
-        setStringCurrentPath(currentPath.normalize().toAbsolutePath().toString());
+        setCurrentPath(currentPath.normalize().toAbsolutePath().toString());
         filesTable.getItems().clear();
         filesTable.getItems().addAll(listPath.stream().map(FileInfo::new).collect(Collectors.toList()));
         filesTable.sort();

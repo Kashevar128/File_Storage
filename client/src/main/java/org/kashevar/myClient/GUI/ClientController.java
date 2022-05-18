@@ -53,6 +53,16 @@ public class ClientController implements Initializable {
     public PanelClientController clientPC;
     public PanelServerController serverPC;
 
+    private boolean transfer;
+
+    public boolean getFlagTransfer() {
+        return transfer;
+    }
+
+    public void thisIsTransfer(boolean transfer) {
+        this.transfer = transfer;
+    }
+
     @FXML
     public void exitBtnAction(ActionEvent actionEvent) {
         Platform.exit();
@@ -69,12 +79,15 @@ public class ClientController implements Initializable {
         if (clientPC.getSelectedFileInfo() != null) {
             srcPC = clientPC;
             dstPC = serverPC;
+            thisIsTransfer(true);
         }
 
         if (serverPC.getSelectedFileInfo() != null) {
             srcPC = serverPC;
             dstPC = clientPC;
+            thisIsTransfer(false);
         }
+
         FileInfo selectedFile = srcPC.getSelectedFileInfo();
         srcPath = Paths.get(srcPC.getCurrentPath(), selectedFile.getFilename());
         dstPath = Paths.get(dstPC.getCurrentPath()).resolve(srcPath.getFileName().toString());
@@ -147,5 +160,13 @@ public class ClientController implements Initializable {
         serverPC = (PanelServerController) serverPanel.getProperties().get("ctrl");
         serverPC.setNettyClient(nettyClient);
 
+    }
+
+    private void copyMyFile() {
+        if(transfer) {
+
+        } else {
+
+        }
     }
 }
