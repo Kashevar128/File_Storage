@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
 import org.kashevar.myClient.clientLogic.FileInfo;
 import org.kashevar.myClient.clientLogic.NettyClient;
+import org.kashevar.myNetwork.HelperClasses.FileSaw;
 
 import java.io.IOException;
 import java.net.URL;
@@ -164,7 +165,9 @@ public class ClientController implements Initializable {
 
     private void copyMyFile() {
         if(transfer) {
-
+            FileSaw.saw(srcPath, bytes -> {
+                
+            });
         } else {
 
         }

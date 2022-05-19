@@ -1,4 +1,4 @@
-package org.kashevar.myServer;
+package org.kashevar.myNetwork.HelperClasses;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class HelperServerMethods {
+public class GenerateList {
 
-    public static List<String> generateListFiles(Path path) {
+    public static List<String> generate (Path path) {
         String pathString = path.toString();
 
         List<String> list;

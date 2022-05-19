@@ -2,13 +2,11 @@ package org.kashevar.myClient.clientLogic;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.kashevar.myClient.GUI.AlertWindowClass;
-import org.kashevar.myNetwork.MyTripleConsumer;
+import org.kashevar.myNetwork.Consumers.MyTripleConsumer;
 import org.kashevar.myNetwork.Response.BasicResponse;
 import org.kashevar.myNetwork.Response.GetFileListResponse;
 import org.kashevar.myNetwork.Response.StartServerResponse;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -2,7 +2,8 @@ package org.kashevar.myServer;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.kashevar.myNetwork.MyBiConsumer;
+import org.kashevar.myNetwork.Consumers.MyBiConsumer;
+import org.kashevar.myNetwork.HelperClasses.GenerateList;
 import org.kashevar.myNetwork.Request.BasicRequest;
 import org.kashevar.myNetwork.Request.GetFileListRequest;
 import org.kashevar.myNetwork.Request.StartClientRequest;
@@ -22,7 +23,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             StartClientRequest startClientRequest = (StartClientRequest) request;
             String name = startClientRequest.getNameUser();
             Path path = Storage.getStorage().createUserRepository(name);
-            List<String> startList = HelperServerMethods.generateListFiles(path);
+            List<String> startList = GenerateList.generate(path);
             channelHandlerContext.writeAndFlush(new StartServerResponse(startList));
 
         });
@@ -30,7 +31,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             GetFileListRequest getFileListRequest = (GetFileListRequest) request;
             String name = getFileListRequest.getName();
             Path path = Paths.get(getFileListRequest.getPath());
-            List<String> newList = HelperServerMethods.generateListFiles(path);
+            List<String> newList = GenerateList.generate(path);
             channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
         });
 //        REQUEST_HANDLERS.put(GetFileListRequest.class, (channelHandlerContext, request) -> {
