@@ -8,26 +8,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Storage {
-    private static Map<String, Path> listUserRepositories;
+    private static volatile Map<String, Path> listUserRepositories = new HashMap<>();
 
-    private static Storage storage;
-
-    synchronized public static Storage getStorage() {
-        if(storage == null) {
-            storage = new Storage();
-        }
-        return storage;
-    }
-
-    synchronized public static Map<String, Path> getListUserRepositories() {
+    public static final synchronized Map<String, Path> getListUserRepositories() {
         return listUserRepositories;
     }
 
-    Storage() {
-        listUserRepositories = new HashMap<>();
-    }
-
-    synchronized public Path createUserRepository(String nameClient) {
+    public static final synchronized Path createUserRepository(String nameClient) {
 
         Path path = Paths.get( "./server/Data_Storage/" + nameClient);
         if(!Files.exists(path)) {

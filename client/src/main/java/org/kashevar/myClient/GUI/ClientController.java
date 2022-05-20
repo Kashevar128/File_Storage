@@ -9,6 +9,8 @@ import javafx.scene.layout.VBox;
 import org.kashevar.myClient.clientLogic.FileInfo;
 import org.kashevar.myClient.clientLogic.NettyClient;
 import org.kashevar.myNetwork.HelperClasses.FileSaw;
+import org.kashevar.myNetwork.Request.SendToFileRequest;
+import org.kashevar.myNetwork.Request.StartSendToFileRequest;
 
 import java.io.IOException;
 import java.net.URL;
@@ -165,8 +167,9 @@ public class ClientController implements Initializable {
 
     private void copyMyFile() {
         if(transfer) {
+            nettyClient.sendMessage(new StartSendToFileRequest(nettyClient.getNameUser(), dstPath.toString()));
             FileSaw.saw(srcPath, bytes -> {
-                
+                nettyClient.sendMessage(new SendToFileRequest(bytes, nettyClient.getNameUser()));
             });
         } else {
 

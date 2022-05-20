@@ -7,6 +7,7 @@ import org.kashevar.myNetwork.HelperClasses.GenerateList;
 import org.kashevar.myNetwork.Request.BasicRequest;
 import org.kashevar.myNetwork.Request.GetFileListRequest;
 import org.kashevar.myNetwork.Request.StartClientRequest;
+import org.kashevar.myNetwork.Request.StartSendToFileRequest;
 import org.kashevar.myNetwork.Response.GetFileListResponse;
 import org.kashevar.myNetwork.Response.StartServerResponse;
 
@@ -22,7 +23,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
         REQUEST_HANDLERS.put(StartClientRequest.class, (channelHandlerContext, request) -> {
             StartClientRequest startClientRequest = (StartClientRequest) request;
             String name = startClientRequest.getNameUser();
-            Path path = Storage.getStorage().createUserRepository(name);
+            Path path = Storage.createUserRepository(name);
             List<String> startList = GenerateList.generate(path);
             channelHandlerContext.writeAndFlush(new StartServerResponse(startList));
 
@@ -34,9 +35,9 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             List<String> newList = GenerateList.generate(path);
             channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
         });
-//        REQUEST_HANDLERS.put(GetFileListRequest.class, (channelHandlerContext, request) -> {
-//
-//        });
+        REQUEST_HANDLERS.put(StartSendToFileRequest.class, (channelHandlerContext, request) -> {
+
+        });
     }
 
     @Override

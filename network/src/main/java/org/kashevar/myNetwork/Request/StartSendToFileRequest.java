@@ -1,12 +1,27 @@
 package org.kashevar.myNetwork.Request;
 
-public class StartSendToFileRequest {
+public class StartSendToFileRequest implements BasicRequest{
 
     private String nameUser;
 
-    private String fileName;
+    public String getNameUser() {
+        return nameUser;
+    }
 
-    private String
+    public String getPath() {
+        return path;
+    }
+
+    String path;
+
+    public StartSendToFileRequest(String nameUser, String path) {
+        this.nameUser = nameUser;
+        this.path = path;
+    }
 
 
+    @Override
+    public String getType() {
+        return "File transfer begins...";
+    }
 }
