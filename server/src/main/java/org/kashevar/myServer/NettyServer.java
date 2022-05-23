@@ -11,10 +11,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import org.kashevar.myNetwork.HelperClasses.Constants;
 
 public class NettyServer {
-
-    private static final int MB_100 = 100 * 1_000_000;
 
     NettyServer() throws InterruptedException {
         EventLoopGroup bossGroup = new NioEventLoopGroup();
@@ -28,7 +27,7 @@ public class NettyServer {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline inbound = socketChannel.pipeline();
                             inbound.addLast(
-                                    new ObjectDecoder(MB_100, ClassResolvers.cacheDisabled(null)),
+                                    new ObjectDecoder(Constants.MB_20.getValue(), ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
                                     new ServerHandler()
                             );

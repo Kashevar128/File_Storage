@@ -142,6 +142,7 @@ public class PanelClientController implements Initializable, PanelController<Pat
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.WARNING, "По какой-то причине не удалось обновить список файлов", ButtonType.OK);
             alert.showAndWait();
+            e.printStackTrace();
         }
     }
 

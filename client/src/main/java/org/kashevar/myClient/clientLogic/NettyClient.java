@@ -12,12 +12,12 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.kashevar.myClient.GUI.ClientController;
+import org.kashevar.myNetwork.HelperClasses.Constants;
 import org.kashevar.myNetwork.Request.StartClientRequest;
 import org.kashevar.myNetwork.Request.BasicRequest;
 
 public class NettyClient {
 
-    public static final int MB_100 = 100 * 1_000_000;
 
     private ClientController clientController;
 
@@ -54,7 +54,7 @@ public class NettyClient {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
                         socketChannel.pipeline().addLast(
-                                new ObjectDecoder(MB_100, ClassResolvers.cacheDisabled(null)),
+                                new ObjectDecoder(Constants.MB_20.getValue(), ClassResolvers.cacheDisabled(null)),
                                 new ObjectEncoder(),
                                 new ClientHandler(NettyClient.this)
                         );

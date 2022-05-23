@@ -8,10 +8,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
 import org.kashevar.myClient.clientLogic.FileInfo;
 import org.kashevar.myClient.clientLogic.NettyClient;
-import org.kashevar.myNetwork.HelperClasses.FileSaw;
+import org.kashevar.myNetwork.HelperClasses.FileHelper;
+import org.kashevar.myNetwork.Request.GetFileRequest;
 import org.kashevar.myNetwork.Request.SendToFileRequest;
-import org.kashevar.myNetwork.Request.StartSendToFileRequest;
+import org.kashevar.myNetwork.Response.SendToFileResponse;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -48,6 +51,14 @@ public class ClientController implements Initializable {
 
     public void setMoveFile(boolean moveFile) {
         this.moveFile = moveFile;
+    }
+
+    public Path getSrcPath() {
+        return srcPath;
+    }
+
+    public Path getDstPath() {
+        return dstPath;
     }
 
     @FXML
@@ -93,6 +104,7 @@ public class ClientController implements Initializable {
 
         FileInfo selectedFile = srcPC.getSelectedFileInfo();
         srcPath = Paths.get(srcPC.getCurrentPath(), selectedFile.getFilename());
+
         dstPath = Paths.get(dstPC.getCurrentPath()).resolve(srcPath.getFileName().toString());
 
         if (srcPath.toString().equals(dstPath.toString()) || dstPath.toString().
@@ -108,29 +120,23 @@ public class ClientController implements Initializable {
             return;
         }
 
-        try {
-            for (String fileName : dstPC.getStringListFiles()) {
-                if (fileName.equals(srcPath.getFileName().toString())) {
-                    Optional<ButtonType> option = AlertWindowClass.showTheFileAlreadyExists();
-                    if (option.get() == ButtonType.OK) {
-                        dstPC.delFile(dstPath);
-                    } else return;
-                }
+        for (String fileName : dstPC.getStringListFiles()) {
+            if (fileName.equals(srcPath.getFileName().toString())) {
+                Optional<ButtonType> option = AlertWindowClass.showTheFileAlreadyExists();
+                if (option.get() == ButtonType.OK) {
+                    dstPC.delFile(dstPath);
+                } else return;
             }
-
-            Files.copy(srcPath, dstPath);
-            dstPC.updateList(Paths.get(dstPC.getCurrentPath()));
-
-            if (isMoveFile()) {
-                srcPC.delFile(srcPath);
-                srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
-                setMoveFile(false);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            AlertWindowClass.showCopyError();
         }
+
+        copyClientFile();
+
+        if (isMoveFile()) {
+            srcPC.delFile(srcPath);
+            srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
+            setMoveFile(false);
+        }
+
     }
 
     @FXML
@@ -165,14 +171,33 @@ public class ClientController implements Initializable {
 
     }
 
-    private void copyMyFile() {
+    private void copyClientFile() {
         if(transfer) {
-            nettyClient.sendMessage(new StartSendToFileRequest(nettyClient.getNameUser(), dstPath.toString()));
-            FileSaw.saw(srcPath, bytes -> {
-                nettyClient.sendMessage(new SendToFileRequest(bytes, nettyClient.getNameUser()));
+            if(!Files.isDirectory(srcPath)) {
+                preparingAndSendingFile(srcPath, false);
+                return;
+            }
+            FileHelper.filesWalk(srcPath, (fileEntry)-> {
+                preparingAndSendingFile(fileEntry, true);
             });
-        } else {
 
         }
+        if(!transfer) {
+            nettyClient.sendMessage(new GetFileRequest(srcPath.toString()));
+        }
     }
+
+    private void preparingAndSendingFile(Path path, boolean directory) {
+        try {
+            byte[] bytes = new byte[(int) Files.size(path)];
+            new FileInputStream(path.toFile()).read(bytes);
+            SendToFileRequest sendToFileRequest = new SendToFileRequest(dstPath.toString(), bytes);
+            if(directory) sendToFileRequest.setDirectory(true);
+            nettyClient.sendMessage(sendToFileRequest);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

@@ -1,9 +1,8 @@
 package org.kashevar.myNetwork.Response;
 
-public class SendToFileResponse implements BasicResponse {
-
+public class SendToFileResponse implements BasicResponse{
     @Override
     public String getType() {
-        return "Начало приема файла...";
+        return "Файл успешно передан";
     }
 }

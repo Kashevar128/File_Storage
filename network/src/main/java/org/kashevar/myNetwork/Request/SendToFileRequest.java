@@ -1,25 +1,37 @@
 package org.kashevar.myNetwork.Request;
 
-public class SendToFileRequest implements BasicRequest{
-    @Override
-    public String getType() {
-        return "Получен пакет данных";
-    }
+public class SendToFileRequest implements BasicRequest {
 
-    private String nameUser;
+    private String path;
 
     private byte[] file;
 
-    public String getNameUser() {
-        return nameUser;
+    private boolean isDirectory;
+
+    public boolean isDirectory() {
+        return isDirectory;
+    }
+
+    public void setDirectory(boolean directory) {
+        isDirectory = directory;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public byte[] getFile() {
         return file;
     }
 
-    public SendToFileRequest(byte[] file, String nameUser) {
+    public SendToFileRequest(String path, byte[] file) {
+        this.path = path;
         this.file = file;
-        this.nameUser = nameUser;
+        this.isDirectory = false;
+    }
+
+    @Override
+    public String getType() {
+        return "РџРµСЂРµРґР°С‡Р° С„Р°Р№Р»Р°...";
     }
 }
