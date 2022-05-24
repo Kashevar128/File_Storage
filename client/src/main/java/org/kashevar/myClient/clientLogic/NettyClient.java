@@ -12,7 +12,7 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.kashevar.myClient.GUI.ClientController;
-import org.kashevar.myNetwork.HelperClasses.Constants;
+import org.kashevar.myNetwork.HelperClasses.Constans;
 import org.kashevar.myNetwork.Request.StartClientRequest;
 import org.kashevar.myNetwork.Request.BasicRequest;
 
@@ -29,12 +29,6 @@ public class NettyClient {
         return nameUser;
     }
 
-    private CurrentListServer currentListServer;
-
-    public CurrentListServer getCurrentListServer() {
-        return currentListServer;
-    }
-
     public ClientController getClientController() {
         return clientController;
     }
@@ -42,7 +36,6 @@ public class NettyClient {
     public NettyClient(ClientController clientController) throws InterruptedException {
         this.clientController = clientController;
         new Thread(()-> {
-            currentListServer = new CurrentListServer();
             EventLoopGroup eventLoopGroup = null;
             try {
                 eventLoopGroup = new NioEventLoopGroup();
@@ -54,7 +47,7 @@ public class NettyClient {
                     @Override
                     protected void initChannel(SocketChannel socketChannel) {
                         socketChannel.pipeline().addLast(
-                                new ObjectDecoder(Constants.MB_20.getValue(), ClassResolvers.cacheDisabled(null)),
+                                new ObjectDecoder(Constans.MB_20, ClassResolvers.cacheDisabled(null)),
                                 new ObjectEncoder(),
                                 new ClientHandler(NettyClient.this)
                         );

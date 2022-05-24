@@ -24,30 +24,23 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     static {
         RESPONSE_HANDLERS.put(StartServerResponse.class, (channelHandlerContext, response, nettyClient) -> {
-            System.out.println("Привет пользователь!");
             StartServerResponse startServerResponse = (StartServerResponse) response;
             List<String> startList = startServerResponse.getListStart();
             nettyClient.getClientController().serverPC.updateList(startList);
         });
+
         RESPONSE_HANDLERS.put(GetFileListResponse.class, (channelHandlerContext, response, nettyClient) -> {
             GetFileListResponse getFileListResponse = (GetFileListResponse) response;
             List<String> currentList = getFileListResponse.getList();
             nettyClient.getClientController().serverPC.updateList(currentList);
         });
-        RESPONSE_HANDLERS.put(SendToFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
-            System.out.println("...");
-        }));
-        RESPONSE_HANDLERS.put(GetFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
-            try {
-                GetFileResponse getFileResponse = (GetFileResponse) response;
-                Path path = nettyClient.getClientController().getDstPath();
-                FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
-                fileOutputStream.write(getFileResponse.getFile());
-                nettyClient.getClientController().clientPC.updateList(path.getParent());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }));
+
+//        RESPONSE_HANDLERS.put(SendToFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
+//
+//        }));
+//        RESPONSE_HANDLERS.put(GetFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
+//
+//        }));
     }
 
     ClientHandler(NettyClient nettyClient) {

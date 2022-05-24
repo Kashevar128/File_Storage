@@ -11,7 +11,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
-import org.kashevar.myNetwork.HelperClasses.Constants;
+import org.kashevar.myNetwork.HelperClasses.Constans;
 
 public class NettyServer {
 
@@ -27,14 +27,14 @@ public class NettyServer {
                         protected void initChannel(SocketChannel socketChannel) throws Exception {
                             ChannelPipeline inbound = socketChannel.pipeline();
                             inbound.addLast(
-                                    new ObjectDecoder(Constants.MB_20.getValue(), ClassResolvers.cacheDisabled(null)),
+                                    new ObjectDecoder(Constans.MB_20, ClassResolvers.cacheDisabled(null)),
                                     new ObjectEncoder(),
                                     new ServerHandler()
                             );
                         }
                     });
             ChannelFuture channelFuture = serverBootstrap.bind(45001).sync();
-            System.out.println("Сервер запущен");
+            System.out.println("Start server");
             channelFuture.channel().closeFuture().sync();
         } finally {
             workerGroup.shutdownGracefully();

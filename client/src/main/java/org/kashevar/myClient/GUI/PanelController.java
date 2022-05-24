@@ -1,9 +1,8 @@
 package org.kashevar.myClient.GUI;
 
-import org.kashevar.myClient.clientLogic.FileInfo;
+import org.kashevar.myNetwork.HelperClasses.FileInfo;
 
 import java.nio.file.Path;
-import java.util.List;
 
 public interface PanelController<T> {
     FileInfo getSelectedFileInfo();

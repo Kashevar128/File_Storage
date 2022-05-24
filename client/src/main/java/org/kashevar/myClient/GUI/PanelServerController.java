@@ -8,8 +8,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import org.kashevar.myNetwork.HelperClasses.EditingPath;
-import org.kashevar.myClient.clientLogic.FileInfo;
+import org.kashevar.myNetwork.HelperClasses.PathHelper;
+import org.kashevar.myNetwork.HelperClasses.FileInfo;
 import org.kashevar.myClient.clientLogic.NettyClient;
 import org.kashevar.myNetwork.Request.GetFileListRequest;
 
@@ -88,7 +88,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
                 if (mouseEvent.getClickCount() == 2) {
                     Path path = Paths.get(getCurrentPath()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
                     if (Files.isDirectory(path)) {
-                        nettyClient.sendMessage(new GetFileListRequest(path, nettyClient.getNameUser()));
+                        nettyClient.sendMessage(new GetFileListRequest(path));
                     }
                 }
             }
@@ -98,7 +98,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
     public void btnPathBack(ActionEvent actionEvent) {
         Path backPath = Paths.get(getCurrentPath()).getParent();
         if (backPath != null && !backPath.toString().endsWith("Data_Storage")) {
-                nettyClient.sendMessage(new GetFileListRequest(backPath, nettyClient.getNameUser()));
+                nettyClient.sendMessage(new GetFileListRequest(backPath));
         }
     }
     @Override
@@ -139,7 +139,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
         List<Path> listPath = list.stream().map(Paths::get).collect(Collectors.toList());
         Path currentPath = listPath.get(list.size() - 1);
         listPath.remove(list.size() - 1);
-        pathField.setText(EditingPath.editing(currentPath.normalize().toString(), nettyClient.getNameUser()));
+        pathField.setText(PathHelper.editingPath(currentPath.normalize().toString(), nettyClient.getNameUser()));
         setCurrentPath(currentPath.normalize().toAbsolutePath().toString());
         filesTable.getItems().clear();
         filesTable.getItems().addAll(listPath.stream().map(FileInfo::new).collect(Collectors.toList()));

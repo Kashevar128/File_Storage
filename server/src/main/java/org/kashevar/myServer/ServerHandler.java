@@ -3,16 +3,13 @@ package org.kashevar.myServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.kashevar.myNetwork.Consumers.MyBiConsumer;
-import org.kashevar.myNetwork.HelperClasses.GenerateList;
+import org.kashevar.myNetwork.HelperClasses.FileHelper;
+import org.kashevar.myNetwork.HelperClasses.FileInfo;
+import org.kashevar.myNetwork.HelperClasses.PathHelper;
 import org.kashevar.myNetwork.Request.*;
 import org.kashevar.myNetwork.Response.GetFileListResponse;
-import org.kashevar.myNetwork.Response.GetFileResponse;
-import org.kashevar.myNetwork.Response.SendToFileResponse;
 import org.kashevar.myNetwork.Response.StartServerResponse;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,45 +25,43 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             StartClientRequest startClientRequest = (StartClientRequest) request;
             String name = startClientRequest.getNameUser();
             Path path = Storage.createUserRepository(name);
-            List<String> startList = GenerateList.generate(path);
+            List<String> startList = PathHelper.generateStringList(path);
             channelHandlerContext.writeAndFlush(new StartServerResponse(startList));
-
         });
+
         REQUEST_HANDLERS.put(GetFileListRequest.class, (channelHandlerContext, request) -> {
             GetFileListRequest getFileListRequest = (GetFileListRequest) request;
-            String name = getFileListRequest.getName();
             Path path = Paths.get(getFileListRequest.getPath());
-            List<String> newList = GenerateList.generate(path);
+            List<String> newList = PathHelper.generateStringList(path);
             channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
         });
-        REQUEST_HANDLERS.put(SendToFileRequest.class, (channelHandlerContext, request) -> {
-            FileOutputStream fileOutputStream;
-            SendToFileRequest sendToFileRequest = (SendToFileRequest) request;
-            Path path = Path.of(sendToFileRequest.getPath());
-            try {
-                fileOutputStream = new FileOutputStream(path.toFile());
-                fileOutputStream.write(sendToFileRequest.getFile());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+
+        REQUEST_HANDLERS.put(SendFileRequest.class, (channelHandlerContext, request) -> {
+            SendFileRequest sendFileRequest = (SendFileRequest) request;
+            FileInfo fileInfo = sendFileRequest.getFileInfo();
+            byte[] file = sendFileRequest.getFile();
+            Path dstPath = Path.of(sendFileRequest.getDstPath());
+
+            switch (fileInfo.getType()) {
+                case FILE:
+                    FileHelper.writeBytesToFile(dstPath, file);
+
+                case DIRECTORY:
+                    if(!Files.exists(dstPath)) {
+                        try {
+                            Files.createDirectory(dstPath);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
             }
-            List<String> newList = GenerateList.generate(path.getParent());
+
+            List<String> newList = PathHelper.generateStringList(dstPath.getParent());
             channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
-            channelHandlerContext.writeAndFlush(new SendToFileResponse());
         });
-        REQUEST_HANDLERS.put(GetFileRequest.class, ((channelHandlerContext, request) -> {
-            FileInputStream fileInputStream;
-            GetFileRequest getFileRequest = (GetFileRequest) request;
-            Path path = Path.of(getFileRequest.getPath());
-            try {
-                long size = Files.size(path);
-                byte[] file = new byte[(int)size];
-                fileInputStream = new FileInputStream(path.toString());
-                fileInputStream.read(file);
-                channelHandlerContext.writeAndFlush(new GetFileResponse(file,path.getFileName().toString()));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }));
+//        REQUEST_HANDLERS.put(GetFileRequest.class, ((channelHandlerContext, request) -> {
+//
+//        }));
     }
 
     @Override

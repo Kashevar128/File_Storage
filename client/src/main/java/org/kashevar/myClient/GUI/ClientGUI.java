@@ -13,8 +13,6 @@ import java.io.IOException;
  */
 public class ClientGUI extends Application {
 
-    String name = "Bro";
-
     @Override
     public void start(Stage stage) throws IOException {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/clientWindow.fxml"));

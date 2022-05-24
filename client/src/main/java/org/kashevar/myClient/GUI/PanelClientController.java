@@ -8,7 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import org.kashevar.myClient.clientLogic.FileInfo;
+import org.kashevar.myNetwork.HelperClasses.FileInfo;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +17,6 @@ import java.nio.file.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -90,7 +89,7 @@ public class PanelClientController implements Initializable, PanelController<Pat
             }
         });
 
-        updateList(Paths.get("."));
+        updateList(Paths.get(System.clearProperty("user.home")));
     }
 
     public void btnPathBack(ActionEvent actionEvent) {
