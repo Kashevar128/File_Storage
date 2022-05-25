@@ -9,6 +9,9 @@ import javafx.scene.layout.VBox;
 import org.kashevar.myNetwork.HelperClasses.FileHelper;
 import org.kashevar.myNetwork.HelperClasses.FileInfo;
 import org.kashevar.myClient.clientLogic.NettyClient;
+import org.kashevar.myNetwork.Request.DeleteFileRequest;
+import org.kashevar.myNetwork.Request.GetFileListRequest;
+import org.kashevar.myNetwork.Request.GetFileRequest;
 import org.kashevar.myNetwork.Request.SendFileRequest;
 
 import java.net.URL;
@@ -23,27 +26,9 @@ public class ClientController implements Initializable {
 
     private boolean delFile = false;
 
-    private boolean moveFile = false;
-
     private PanelController srcPC = null, dstPC = null;
 
     Path srcPath = null, dstPath = null;
-
-    public boolean isDelFile() {
-        return delFile;
-    }
-
-    public void setDelFile(boolean delFile) {
-        this.delFile = delFile;
-    }
-
-    public boolean isMoveFile() {
-        return moveFile;
-    }
-
-    public void setMoveFile(boolean moveFile) {
-        this.moveFile = moveFile;
-    }
 
     @FXML
     VBox clientPanel, serverPanel;
@@ -53,6 +38,14 @@ public class ClientController implements Initializable {
 
     private boolean transfer;
 
+    public boolean isDelFile() {
+        return delFile;
+    }
+
+    public void setDelFile(boolean delFile) {
+        this.delFile = delFile;
+    }
+
     public void thisIsTransfer(boolean transfer) {
         this.transfer = transfer;
     }
@@ -60,6 +53,7 @@ public class ClientController implements Initializable {
     @FXML
     public void exitBtnAction(ActionEvent actionEvent) {
         Platform.exit();
+        nettyClient.exitClient();
     }
 
     @FXML
@@ -95,10 +89,16 @@ public class ClientController implements Initializable {
         }
 
         if (isDelFile()) {
-            srcPC.delFile(srcPath);
-            srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
-            setDelFile(false);
-            return;
+            if (srcPC.getClass().equals(clientPC.getClass())) {
+                srcPC.delFile(srcPath);
+                srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
+                setDelFile(false);
+                return;
+            }
+            if (srcPC.getClass().equals(serverPC.getClass())) {
+                FileInfo fileInfo = new FileInfo(srcPath);
+                nettyClient.sendMessage(new DeleteFileRequest(srcPath.toString(), fileInfo));
+            }
         }
 
         for (String fileName : dstPC.getStringListFiles()) {
@@ -112,12 +112,6 @@ public class ClientController implements Initializable {
 
         copyFile();
 
-        if (isMoveFile()) {
-            srcPC.delFile(srcPath);
-            srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
-            setMoveFile(false);
-        }
-
     }
 
     @FXML
@@ -127,15 +121,9 @@ public class ClientController implements Initializable {
     }
 
     @FXML
-    public void moveFile(ActionEvent actionEvent) {
-        setMoveFile(true);
-        copyBtnAction(actionEvent);
-    }
-
-    @FXML
     public void refresh(ActionEvent actionEvent) {
-        srcPC.updateList(Paths.get(srcPC.getCurrentPath()));
-        dstPC.updateList(Paths.get(dstPC.getCurrentPath()));
+        clientPC.updateList(Paths.get(clientPC.getCurrentPath()));
+        nettyClient.sendMessage(new GetFileListRequest(serverPC.getCurrentPath()));
     }
 
 
@@ -156,22 +144,26 @@ public class ClientController implements Initializable {
             FileInfo fileInfo = new FileInfo(srcPath);
             switch (fileInfo.getType()) {
                 case FILE:
-                    packingAndSending(srcPath, fileInfo, null);
+                    byte[] file = FileHelper.readToByteFile(srcPath);
+                    nettyClient.sendMessage(new SendFileRequest(file, dstPath.toString(), fileInfo));
                     break;
-
                 case DIRECTORY:
                     FileHelper.filesWalk(srcPath, (fileEntry) -> {
-                        FileInfo directoryInfo = new FileInfo(fileEntry);
-                        packingAndSending(fileEntry, fileInfo, directoryInfo);
-                    } );
+                        FileInfo fileInfo1 = new FileInfo(fileEntry);
+                        FileInfo fileDirectory = new FileInfo(fileEntry.getParent());
+                        byte[] fileChildren = FileHelper.readToByteFile(fileEntry);
+                        nettyClient.sendMessage(new SendFileRequest(fileChildren, dstPath.getParent().toString(),
+                                fileDirectory, fileInfo1));
+                    });
             }
+        }
+
+        if (!transfer) {
+            nettyClient.sendMessage(new GetFileRequest(srcPath.toString()));
         }
     }
 
-    private void packingAndSending(Path path, FileInfo fileInfo, FileInfo directoryInfo) {
-        byte[] file = FileHelper.readToByteFile(path);
-        nettyClient.sendMessage(new SendFileRequest(file, dstPath.toString(), fileInfo, directoryInfo));
-    }
+
 
 
 }

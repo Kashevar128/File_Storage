@@ -43,22 +43,21 @@ public class FileHelper {
     }
 
     public static byte[] readToByteFile(Path path) {
-        try {
-            byte[] bytesFile = new byte[(int) Files.size(path)];
-            FileInputStream fileInputStream  = new FileInputStream(path.toFile());
-            fileInputStream.read(bytesFile);
-            return bytesFile;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            try(FileInputStream fileInputStream  = new FileInputStream(path.toFile())) {
+                byte[] bytesFile = new byte[(int) Files.size(path)];
+                fileInputStream.read(bytesFile);
+                return bytesFile;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
     }
 
     public static void writeBytesToFile(Path path, byte[] file) {
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream(path.toFile());
-            fileOutputStream.write(file);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            try(FileOutputStream fileOutputStream = new FileOutputStream(path.toFile())) {
+                fileOutputStream.write(file);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
     }
 }

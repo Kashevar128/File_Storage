@@ -26,9 +26,9 @@ import java.util.stream.Stream;
 
 public class PanelServerController implements Initializable, PanelController<List<String>> {
 
-    String stringCurrentPath;
+    private String stringCurrentPath;
 
-    NettyClient nettyClient;
+    private NettyClient nettyClient;
 
     public void setNettyClient(NettyClient nettyClient) {
         this.nettyClient = nettyClient;
@@ -88,7 +88,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
                 if (mouseEvent.getClickCount() == 2) {
                     Path path = Paths.get(getCurrentPath()).resolve(filesTable.getSelectionModel().getSelectedItem().getFilename());
                     if (Files.isDirectory(path)) {
-                        nettyClient.sendMessage(new GetFileListRequest(path));
+                        nettyClient.sendMessage(new GetFileListRequest(path.toString()));
                     }
                 }
             }
@@ -98,7 +98,7 @@ public class PanelServerController implements Initializable, PanelController<Lis
     public void btnPathBack(ActionEvent actionEvent) {
         Path backPath = Paths.get(getCurrentPath()).getParent();
         if (backPath != null && !backPath.toString().endsWith("Data_Storage")) {
-                nettyClient.sendMessage(new GetFileListRequest(backPath));
+                nettyClient.sendMessage(new GetFileListRequest(backPath.toString()));
         }
     }
     @Override

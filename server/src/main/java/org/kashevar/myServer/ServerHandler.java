@@ -8,13 +8,16 @@ import org.kashevar.myNetwork.HelperClasses.FileInfo;
 import org.kashevar.myNetwork.HelperClasses.PathHelper;
 import org.kashevar.myNetwork.Request.*;
 import org.kashevar.myNetwork.Response.GetFileListResponse;
+import org.kashevar.myNetwork.Response.GetFileResponse;
 import org.kashevar.myNetwork.Response.StartServerResponse;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -41,27 +44,66 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
             FileInfo fileInfo = sendFileRequest.getFileInfo();
             byte[] file = sendFileRequest.getFile();
             Path dstPath = Path.of(sendFileRequest.getDstPath());
+            List<String> newList = null;
 
             switch (fileInfo.getType()) {
                 case FILE:
                     FileHelper.writeBytesToFile(dstPath, file);
-
+                    newList = PathHelper.generateStringList(dstPath.getParent());
+                    break;
                 case DIRECTORY:
-                    if(!Files.exists(dstPath)) {
+                    FileInfo fileChildrenInfo = sendFileRequest.getFileChildrenInfo();
+                    Path directoryPath = dstPath.resolve(fileInfo.getFilename());
+                    if (!Files.exists(directoryPath)) {
                         try {
-                            Files.createDirectory(dstPath);
+                            Files.createDirectory(directoryPath);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
+                    Path filePath = directoryPath.resolve(fileChildrenInfo.getFilename());
+                    System.out.println(filePath);
+                    FileHelper.writeBytesToFile(filePath, file);
+                    newList = PathHelper.generateStringList(dstPath);
             }
-
-            List<String> newList = PathHelper.generateStringList(dstPath.getParent());
             channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
         });
-//        REQUEST_HANDLERS.put(GetFileRequest.class, ((channelHandlerContext, request) -> {
-//
-//        }));
+
+        REQUEST_HANDLERS.put(DeleteFileRequest.class, (channelHandlerContext, request) -> {
+            DeleteFileRequest deleteFileRequest = (DeleteFileRequest) request;
+            FileInfo fileInfo = deleteFileRequest.getFileInfo();
+            Path path = Path.of(deleteFileRequest.getPath());
+
+            switch (fileInfo.getType()) {
+                case FILE:
+                    try {
+                        Files.deleteIfExists(path);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    break;
+                case DIRECTORY:
+                    try (Stream<Path> walk = Files.walk(path)) {
+                        walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+            }
+            List<String> newList = PathHelper.generateStringList(path.getParent());
+            channelHandlerContext.writeAndFlush(new GetFileListResponse(newList));
+        });
+
+        REQUEST_HANDLERS.put(GetFileRequest.class, ((channelHandlerContext, request) -> {
+            GetFileRequest getFileRequest = (GetFileRequest) request;
+            Path path = Path.of(getFileRequest.getSrcPath());
+            FileInfo fileInfo = new FileInfo(path);
+            switch (fileInfo.getType()) {
+                case FILE:
+                    byte[] file = FileHelper.readToByteFile(path);
+                    channelHandlerContext.writeAndFlush(new GetFileResponse(file, fileInfo));
+                case DIRECTORY:
+            }
+        }));
     }
 
     @Override

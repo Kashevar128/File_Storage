@@ -8,6 +8,10 @@ public class GetFileRequest implements BasicRequest{
         return srcPath;
     }
 
+    public GetFileRequest(String srcPath) {
+        this.srcPath = srcPath;
+    }
+
     @Override
     public String getType() {
         return "Get file";

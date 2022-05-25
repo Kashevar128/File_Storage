@@ -1,12 +1,9 @@
-package org.kashevar.myNetwork.Request;
+package org.kashevar.myNetwork.Response;
 
 import org.kashevar.myNetwork.HelperClasses.FileInfo;
 
-public class SendFileRequest implements BasicRequest {
-
+public class GetFileResponse implements BasicResponse {
     private byte[] file;
-
-    private String dstPath;
 
     private FileInfo fileInfo;
 
@@ -14,10 +11,6 @@ public class SendFileRequest implements BasicRequest {
 
     public byte[] getFile() {
         return file;
-    }
-
-    public String getDstPath() {
-        return dstPath;
     }
 
     public FileInfo getFileInfo() {
@@ -28,19 +21,18 @@ public class SendFileRequest implements BasicRequest {
         return fileChildrenInfo;
     }
 
-    public SendFileRequest(byte[] file, String dstPath, FileInfo fileInfo) {
-        this(file, dstPath, fileInfo, null);
+    public GetFileResponse(byte[] file, FileInfo fileInfo) {
+        this(file, fileInfo, null);
     }
 
-    public SendFileRequest(byte[] file, String dstPath, FileInfo fileInfo, FileInfo fileChildrenInfo) {
+    public GetFileResponse(byte[] file, FileInfo fileInfo, FileInfo fileChildrenInfo) {
         this.file = file;
-        this.dstPath = dstPath;
         this.fileInfo = fileInfo;
         this.fileChildrenInfo = fileChildrenInfo;
     }
 
     @Override
     public String getType() {
-        return "Send file";
+        return "File sent";
     }
 }

@@ -10,7 +10,7 @@ public class GetFileListRequest implements BasicRequest {
         return path;
     }
 
-    public GetFileListRequest(Path path) {
+    public GetFileListRequest(String path) {
         this.path = path.toString();
     }
 

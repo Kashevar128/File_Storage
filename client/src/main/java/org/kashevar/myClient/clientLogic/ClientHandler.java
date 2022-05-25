@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import javafx.application.Platform;
 import org.kashevar.myNetwork.Consumers.MyTripleConsumer;
+import org.kashevar.myNetwork.HelperClasses.FileHelper;
+import org.kashevar.myNetwork.HelperClasses.FileInfo;
 import org.kashevar.myNetwork.Response.*;
 
 import java.io.File;
@@ -35,12 +37,18 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             nettyClient.getClientController().serverPC.updateList(currentList);
         });
 
-//        RESPONSE_HANDLERS.put(SendToFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
-//
-//        }));
-//        RESPONSE_HANDLERS.put(GetFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
-//
-//        }));
+        RESPONSE_HANDLERS.put(GetFileResponse.class, ((channelHandlerContext, response, nettyClient) -> {
+            GetFileResponse getFileResponse = (GetFileResponse) response;
+            byte[] file = getFileResponse.getFile();
+            FileInfo fileInfo = getFileResponse.getFileInfo();
+            Path path = Path.of(nettyClient.getClientController().clientPC.getCurrentPath());
+            Path newPath = path.resolve(fileInfo.getFilename());
+            switch (fileInfo.getType()) {
+                case FILE:
+                    FileHelper.writeBytesToFile(newPath, file);
+                    nettyClient.getClientController().clientPC.updateList(path);
+            }
+        }));
     }
 
     ClientHandler(NettyClient nettyClient) {

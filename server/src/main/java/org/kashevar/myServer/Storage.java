@@ -7,15 +7,25 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Storage {
+public class Storage  {
     private static volatile Map<String, Path> listUserRepositories = new HashMap<>();
 
     public static final synchronized Map<String, Path> getListUserRepositories() {
         return listUserRepositories;
     }
 
-    public static final synchronized Path createUserRepository(String nameClient) {
+    static {
+        Path path = Paths.get("./server/Data_Storage");
+        if(!Files.exists(path)) {
+            try {
+                Files.createDirectory(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
+    public static final synchronized Path createUserRepository(String nameClient) {
         Path path = Paths.get( "./server/Data_Storage/" + nameClient);
         if(!Files.exists(path)) {
             try {

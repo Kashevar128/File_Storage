@@ -69,4 +69,8 @@ public class NettyClient {
         BasicRequest request = (BasicRequest) msg;
         channel.writeAndFlush(request);
     }
+
+    public void exitClient() {
+       channel.close();
+    }
 }
