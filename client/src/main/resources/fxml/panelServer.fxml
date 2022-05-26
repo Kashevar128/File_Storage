@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.kashevar.myClient.GUI.PanelServerController">
+    <HBox>
+        <TextField fx:id="pathField" editable="false" HBox.hgrow="ALWAYS"/>
+        <Button text="Назад" onAction="#btnPathBack"/>
+    </HBox>
+    <TableView fx:id="filesTable" VBox.vgrow="ALWAYS"/>
+
+    <properties>
+        <ctrl>
+           <fx:reference source="controller"/>
+        </ctrl>
+    </properties>
+</VBox>
