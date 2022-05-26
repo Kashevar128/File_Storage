@@ -95,13 +95,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
         REQUEST_HANDLERS.put(GetFileRequest.class, ((channelHandlerContext, request) -> {
             GetFileRequest getFileRequest = (GetFileRequest) request;
-            Path path = Path.of(getFileRequest.getSrcPath());
-            FileInfo fileInfo = new FileInfo(path);
+            Path srcPath = Path.of(getFileRequest.getSrcPath());
+            FileInfo fileInfo = new FileInfo(srcPath);
             switch (fileInfo.getType()) {
                 case FILE:
-                    byte[] file = FileHelper.readToByteFile(path);
+                    byte[] file = FileHelper.readToByteFile(srcPath);
                     channelHandlerContext.writeAndFlush(new GetFileResponse(file, fileInfo));
+                    break;
                 case DIRECTORY:
+                    FileHelper.filesWalk(srcPath, (fileEntry) -> {
+                        FileInfo fileInfo1 = new FileInfo(fileEntry);
+                        FileInfo fileDirectory = new FileInfo(fileEntry.getParent());
+                        byte[] fileChildren = FileHelper.readToByteFile(fileEntry);
+                        channelHandlerContext.writeAndFlush(new GetFileResponse(fileChildren, fileDirectory, fileInfo1));
+                    });
             }
         }));
     }

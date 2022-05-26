@@ -71,6 +71,7 @@ public class NettyClient {
     }
 
     public void exitClient() {
-       channel.close();
+        channel.closeFuture();
+        channel.close();
     }
 }

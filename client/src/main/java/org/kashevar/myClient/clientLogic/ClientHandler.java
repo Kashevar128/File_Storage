@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -41,12 +42,27 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
             GetFileResponse getFileResponse = (GetFileResponse) response;
             byte[] file = getFileResponse.getFile();
             FileInfo fileInfo = getFileResponse.getFileInfo();
-            Path path = Path.of(nettyClient.getClientController().clientPC.getCurrentPath());
-            Path newPath = path.resolve(fileInfo.getFilename());
+            Path dstPath = Path.of(nettyClient.getClientController().clientPC.getCurrentPath());
             switch (fileInfo.getType()) {
                 case FILE:
-                    FileHelper.writeBytesToFile(newPath, file);
-                    nettyClient.getClientController().clientPC.updateList(path);
+                    Path newDstPath = dstPath.resolve(fileInfo.getFilename());
+                    FileHelper.writeBytesToFile(newDstPath, file);
+                    nettyClient.getClientController().clientPC.updateList(dstPath);
+                    break;
+                case DIRECTORY:
+                    FileInfo fileChildrenInfo = getFileResponse.getFileChildrenInfo();
+                    Path directoryPath = dstPath.resolve(fileInfo.getFilename());
+                    if (!Files.exists(directoryPath)) {
+                        try {
+                            Files.createDirectory(directoryPath);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    Path filePath = directoryPath.resolve(fileChildrenInfo.getFilename());
+                    System.out.println(filePath);
+                    FileHelper.writeBytesToFile(filePath, file);
+                    nettyClient.getClientController().clientPC.updateList(dstPath);
             }
         }));
     }
