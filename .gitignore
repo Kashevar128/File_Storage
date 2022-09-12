@@ -1,1 +1,6 @@
 .idea
+target
+*.iml
+
+/server/Data_Storage/
+
